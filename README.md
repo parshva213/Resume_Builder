@@ -31,7 +31,6 @@ Install dependencies and run the app:
 1. Install frontend deps and start Vite dev server
 
 ```powershell
-cd d:\\Resume_Builder
 npm install
 npm run dev
 ```
@@ -114,7 +113,7 @@ Helper PowerShell scripts are in `scripts\\`:
 ## Project Structure (high level)
 
 ```
-d:\\Resume_Builder
+Resume_Builder
 ├── src/                 # React app
 ├── server/              # Express API and DB schema
 ├── public/              # Static assets
