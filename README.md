@@ -1,161 +1,135 @@
-# ResumeBuilder - Professional Resume Creator
+# Resume Builder
 
-A modern, responsive resume builder with real-time preview, multiple templates, and user authentication.
+A modern, responsive resume builder with multiple templates, real-time preview, user authentication, and AI-assisted content generation.
 
 ## Features
 
-- 🎨 **Multiple Templates**: Professional, Modern, and Creative resume templates
-- 🎨 **Custom Colors**: RGBA color picker for personalized themes
-- 📱 **Responsive Design**: Works perfectly on desktop and mobile
-- 🔐 **User Authentication**: Secure signup/login with PostgreSQL
-- 💾 **Save & Load**: Save multiple resumes per user
-- 📄 **PDF Export**: Download resumes as PDF files
-- 🌙 **Dark/Light Theme**: Toggle between themes
-- ⚡ **Real-time Preview**: Live preview as you type
+- Multiple resume templates (Professional, Modern, Creative)
+- Real-time preview while editing
+- Save/load resumes per user (PostgreSQL)
+- Authentication (server-side API)
+- AI-assisted resume content generation (Google Generative Language API)
+- Export / download as PDF
+- Dark/Light theme support
 
 ## Tech Stack
 
-### Frontend
-- React 18 + TypeScript
-- Tailwind CSS
-- Vite
-- React Router
-- Lucide React Icons
+- Frontend: React + TypeScript, Vite, Tailwind CSS
+- Backend: Node.js, Express
+- Database: PostgreSQL
+- Auth & DB client: Supabase client used in frontend for some features
 
-### Backend
-- Node.js + Express
-- PostgreSQL
-- bcrypt for password hashing
-- CORS enabled
+## Quick Start (Windows / PowerShell)
 
-## Quick Start
+Prerequisites:
 
-### 1. Database Setup
-```bash
-# Run the database setup script
-powershell -ExecutionPolicy Bypass -File scripts/setup-database.ps1
-```
+- Node.js (v18+ recommended) or Bun
+- PostgreSQL CLI (`psql`) available in PATH if you plan to run the included DB script
 
-### 2. Backend Setup
-```bash
-# Install server dependencies
-cd server
+Install dependencies and run the app:
+
+1. Install frontend deps and start Vite dev server
+
+```powershell
+cd d:\\Resume_Builder
 npm install
-
-# Start the API server
-npm start
-```
-Server runs on: http://localhost:3001
-
-### 3. Frontend Setup
-```bash
-# Install frontend dependencies
-npm install
-
-# Start the development server
 npm run dev
 ```
-App runs on: http://localhost:5173
 
-## API Endpoints
+2. Start the backend API (in a separate terminal), or use the helper script
 
-### Authentication
-- `POST /api/signup` - Create new account
-- `POST /api/login` - User login
+```powershell
+# Option A: use the helper script (installs server deps and starts server)
+powershell -ExecutionPolicy Bypass -File scripts\\setup-and-run.ps1
 
-### Resumes
-- `GET /api/resumes/:userId` - Get user's resumes
-- `POST /api/resumes` - Save new resume
-- `PUT /api/resumes/:id` - Update resume
-- `DELETE /api/resumes/:id` - Delete resume
-
-## Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+# Option B: manual
+cd server
+npm install
+npm start
 ```
 
-### Resumes Table
-```sql
-CREATE TABLE resumes (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(255) NOT NULL,
-  content JSONB NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+The frontend dev server typically runs at `http://localhost:5173` and the API server at `http://localhost:3001`.
+
+## Database Setup
+
+The repo includes `scripts\\setup-database.ps1` which runs the SQL in `server\\database.sql`.
+
+Run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\\setup-database.ps1
 ```
+
+This script relies on `psql` being available and uses default connection values set in the script. Edit the script or set environment variables if your PostgreSQL instance uses different credentials.
 
 ## Environment Variables
 
-Create `.env` file in the root directory:
+Create a `.env` (or `.env.local`) file in the frontend root with the following keys used in the app:
+
 ```env
-VITE_PDFLAYER_KEY=your_pdflayer_api_key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GOOGLE_AI_API_KEY=your_google_ai_api_key
+# Optional: VITE_PDFLAYER_KEY=your_pdflayer_api_key
 ```
 
-Server environment variables (optional):
+Server-side environment variables (used by `server`):
+
 ```env
 PGUSER=postgres
 PGHOST=localhost
 PGDATABASE=reactra
-PGPASSWORD=PARSHVAshah
+PGPASSWORD=your_db_password
 PGPORT=2103
 PORT=3001
 ```
 
-## Project Structure
+Notes:
+
+- `src/lib/supabase.ts` expects `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+- `src/lib/aiAPI.ts` expects `VITE_GOOGLE_AI_API_KEY`.
+
+## Scripts (what's available)
+
+- Frontend (root `package.json`):
+
+  - `npm run dev` — start Vite dev server
+  - `npm run build` — build production bundle
+  - `npm run preview` — preview production build
+  - `npm run lint` — run ESLint
+
+- Server (`server/package.json`):
+  - `npm start` — start Express API (runs `node server.js`)
+
+Helper PowerShell scripts are in `scripts\\`:
+
+- `setup-and-run.ps1` — installs server deps and starts the server
+- `setup-database.ps1` — creates DB and runs `server\\database.sql` (uses `psql`)
+
+## Environment & Secrets Guidance
+
+- Do not commit `.env` files or secret keys to the repository.
+- For production, set environment variables in your hosting environment (Vercel, Netlify, or your server provider).
+
+## Project Structure (high level)
 
 ```
-craftify-resumes-74/
-├── src/
-│   ├── components/          # React components
-│   ├── pages/              # Page components
-│   ├── context/            # React context
-│   ├── utils/              # Utility functions
-│   └── lib/                # Library files
-├── server/                 # Backend API
-│   ├── server.js           # Express server
-│   ├── package.json        # Server dependencies
-│   └── database.sql        # Database schema
-├── scripts/                # Setup scripts
-└── public/                 # Static assets
+d:\\Resume_Builder
+├── src/                 # React app
+├── server/              # Express API and DB schema
+├── public/              # Static assets
+├── scripts/             # PowerShell helpers for setup
+├── package.json         # Frontend dev/build scripts
+└── README.md
 ```
-
-## Usage
-
-1. **Sign Up**: Create a new account with email and password
-2. **Login**: Sign in to access your resumes
-3. **Create Resume**: Fill in your information in the form
-4. **Customize**: Choose template and colors
-5. **Preview**: See real-time preview of your resume
-6. **Save**: Save your resume to your account
-7. **Download**: Export as PDF
-
-## Error Handling
-
-The application includes comprehensive error handling:
-- Form validation (client-side)
-- API error responses
-- Network error handling
-- User-friendly error messages
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feat/your-feature`
+3. Make changes and add tests where appropriate
+4. Submit a pull request describing your changes
 
 ## License
 
-MIT License - see LICENSE file for details.
+This project is released under the MIT License. See the `LICENSE` file for details.
